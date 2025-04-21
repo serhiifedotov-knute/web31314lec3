@@ -1,12 +1,26 @@
 'use client'
 import styles from "./page.module.css";
 import TableRow from './table-row'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import Button from 'react-bootstrap/Button';
+import axios from 'axios'
 
 export default function Home() {
 
   let [lectureNumber, setState] = useState(3);
+
+  
+    let [groupId, updateGroupId] = useState('');
+  let [groups, updateGroups] = useState([]);
+
+    useEffect( ()=>{
+
+	axios.get('http://localhost:8080/groups').then( response=>{
+	    console.log(response.data);
+	    updateGroups(response.data);
+	});
+
+    },[]);
 
   const students = [
     {
@@ -39,6 +53,21 @@ export default function Home() {
 
   const addStudent = ()=>{
     console.log(`Add student`)
+  }
+
+  const addGroup = ()=>{
+    console.log(`Add group: ${groupId}`)
+
+	axios.post('http://localhost:8080/groups',{groupId} ).then( response=>{
+	    if(response.status >= 200 && response.status < 400){
+		console.log(response.status);
+		console.log(response.data);
+	    }else{
+		alert('Error happen');
+	    }
+	});
+
+
   }
 
   const increaseLectureNumber = ()=>{
@@ -79,7 +108,16 @@ export default function Home() {
       </tbody>
     </table>
     <div>
+      {groups.map(gr=><div key={gr.groupId}>{gr.groupId}</div>)}
+    </div>
+    <div>
       <Button onClick={()=>{addStudent();}}>Add student</Button>
+    </div>
+    <div>
+      <input value={groupId} onChange={e=>{
+	    updateGroupId(e.target.value);
+      }} placeholder="enter group id"/>
+      <Button onClick={()=>{addGroup();}}>Add Group</Button>
     </div>
     <div>
       <Button onClick={()=>{increaseLectureNumber();}}>Increase Lecture NUmber</Button>
